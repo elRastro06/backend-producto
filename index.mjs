@@ -1,6 +1,7 @@
 import { ObjectId } from "mongodb";
 import products from "./conn.mjs";
 import express from "express";
+import { getFiltros, getSortByDate } from "./help.mjs";
 
 const app = express();
 const port = 5000;
@@ -14,13 +15,9 @@ app.listen(port, () => {
 
 app.get("/", async (req, res) => {
   try {
-    let filtro = {};
-    const queries = req.query;
-    if (queries.productId) {
-      filtro = { ...filtro, productId: parseInt(queries.productId) };
-    }
-
-    let results = await products.find(filtro).toArray();
+    const filtro = getFiltros(req);
+    const sortOption = getSortByDate(req);
+    let results = await products.find(filtro).sort(sortOption).toArray();
     res.send(results).status(200);
   } catch (e) {
     res.send(e).status(500);
