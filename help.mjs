@@ -19,17 +19,16 @@ export function getFiltros(req) {
       price: parseFloat(queries.price),
     };
   }
-  if (queries.propietario) {
-    const usuario = getUsuario(queries.propietario);
+  if (queries.user_id) {
     filtros = {
       ...filtros,
-      propietario: { $regex: usuario.id },
+      user_id: queries.user_id,
     };
   }
   return filtros;
 }
 
-function getUsuario(name) {
+function getUsuario(user_id) {
   // hago petición al microservicio de usuarios para obtener el id del usuario por el nombre
 }
 

@@ -17,7 +17,16 @@ app.get("/", async (req, res) => {
   try {
     const filtro = getFiltros(req);
     const sortOption = getSortByDate(req);
-    let results = await products.find(filtro).sort(sortOption).toArray();
+
+    const offset = parseInt(req.query.offset) || 0;
+    const limit = parseInt(req.query.limit) || 0;
+
+    let results = await products
+      .find(filtro)
+      .sort(sortOption)
+      .skip(offset)
+      .limit(limit)
+      .toArray();
     res.send(results).status(200);
   } catch (e) {
     res.send(e).status(500);
