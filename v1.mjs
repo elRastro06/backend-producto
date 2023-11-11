@@ -2,6 +2,7 @@ import { ObjectId } from "mongodb";
 import products from "./conn.mjs";
 import express from "express";
 import { getFiltros, getSortByDate } from "./help.mjs";
+import { getClientById } from "./api.mjs";
 
 const app = express.Router();
 
@@ -31,7 +32,7 @@ app.get("/", async (req, res) => {
 app.post("/", async (req, res) => {
   try {
     const product = req.body;
-    const result = await products.insertOne(product);
+    const result = await products.insertOne({ ...product, date: new Date() });
     res.send(result).status(200);
   } catch (e) {
     res.send(e).status(500);
@@ -74,6 +75,16 @@ app.put("/:id", async (req, res) => {
       { $set: req.body }
     );
     res.send(result).status(200);
+  } catch (e) {
+    res.send(e).status(500);
+  }
+});
+
+app.get("/:id/cliente", async (req, res) => {
+  try {
+    const result = await products.findOne({ _id: new ObjectId(req.params.id) });
+    const cliente = await getClientById(result.userID);
+    res.send(cliente).status(200);
   } catch (e) {
     res.send(e).status(500);
   }
