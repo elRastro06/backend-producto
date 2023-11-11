@@ -2,7 +2,7 @@ import { ObjectId } from "mongodb";
 import products from "./conn.mjs";
 import express from "express";
 import { getFiltros, getSortByDate } from "./help.mjs";
-import { getClientById } from "./api.mjs";
+import { getClientById, getBidsByProductId } from "./api.mjs";
 
 const app = express.Router();
 
@@ -59,15 +59,6 @@ app.delete("/:id", async (req, res) => {
   }
 });
 
-app.delete("/", async (req, res) => {
-  try {
-    let result = await products.deleteMany(req.body);
-    res.send(result).status(200);
-  } catch (e) {
-    res.send(e).status(500);
-  }
-});
-
 app.put("/:id", async (req, res) => {
   try {
     const result = await products.updateOne(
@@ -85,6 +76,15 @@ app.get("/:id/cliente", async (req, res) => {
     const result = await products.findOne({ _id: new ObjectId(req.params.id) });
     const cliente = await getClientById(result.userID);
     res.send(cliente).status(200);
+  } catch (e) {
+    res.send(e).status(500);
+  }
+});
+
+app.get("/:id/pujas", async (req, res) => {
+  try {
+    const pujas = await getBidsByProductId(req.params.id);
+    res.send(pujas).status(200);
   } catch (e) {
     res.send(e).status(500);
   }
