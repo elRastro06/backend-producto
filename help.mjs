@@ -19,17 +19,13 @@ export function getFiltros(req) {
       price: parseFloat(queries.price),
     };
   }
-  if (queries.user_id) {
+  if (queries.userID) {
     filtros = {
       ...filtros,
-      user_id: queries.user_id,
+      userID: queries.userID,
     };
   }
   return filtros;
-}
-
-function getUsuario(user_id) {
-  // hago petición al microservicio de usuarios para obtener el id del usuario por el nombre
 }
 
 export function getSortByDate(req) {
