@@ -1,5 +1,6 @@
 import express from "express";
 import v1 from "./v1.mjs";
+import v2 from "./v2.mjs";
 
 const app = express();
 const port = 5001;
@@ -12,3 +13,4 @@ app.listen(port, () => {
 });
 
 app.use("/v1", v1);
+app.use("/v2", v2);
