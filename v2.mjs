@@ -35,11 +35,10 @@ app.get("/", async (req, res) => {
 
 app.get("/:id1/:id2", async (req, res) => {
     try {
-      const results = await products.find({$or: [
+      const results = await products.findOne({$or: [
         {userID: req.params.id1, soldID: req.params.id2}, 
         {userID: req.params.id2, soldID: req.params.id1}
-      ]})
-      .toArray();
+      ]});
   
     res.send(results).status(200);
     } catch (e) {
