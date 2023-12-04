@@ -3,6 +3,7 @@ import products from "./conn.mjs";
 import express from "express";
 import { getFiltros, getSortByDate } from "./help.mjs";
 import { getClientById, getBidsByProductId } from "./api.mjs";
+import axios from "axios";
 
 const app = express.Router();
 
@@ -11,10 +12,10 @@ app.use(express.urlencoded({ extended: true }));
 
 app.get("/", async (req, res) => {
   if(req.query.lat && req.query.long && req.query.radius){
-    const clientPetition = await fetch(`http://localhost:5000/v1/?lat=${req.query.lat}&long=${req.query.long}&radius=${req.query.radius}`);
-    const result_cliente = await clientPetition.json();
+    const clientPetition = await axios.get(`http://localhost:5000/v1/?lat=${req.query.lat}&long=${req.query.long}&radius=${req.query.radius}`);
     // make a list with the ids of the clients in order to add them to the filter
-    const clientIds = result_cliente.map((client) => client._id);
+    const clientData = clientPetition.data;
+    const clientIds = clientData.map((client) => client._id);
     let filtros = { userID: { $in: clientIds } };
     if (req.query.name) {
       filtros = {
