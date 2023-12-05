@@ -1,16 +1,14 @@
-export function getFiltros(req) {
+import axios from "axios";
+
+export async function getFiltros(req) {
   let filtros = {};
   const queries = req.query;
-  if (queries.description) {
+  if (queries.description || queries.name) {
     filtros = {
-      ...filtros,
-      description: { $regex: queries.description, $options: "i" },
-    };
-  }
-  if (queries.name) {
-    filtros = {
-      ...filtros,
-      name: { $regex: queries.name, $options: "i" },
+      $or: [
+        { description: { $regex: queries.description, $options: "i" } },
+        { name: { $regex: queries.name, $options: "i" } },
+      ],
     };
   }
   if (queries.price) {
@@ -23,6 +21,18 @@ export function getFiltros(req) {
     filtros = {
       ...filtros,
       userID: queries.userID,
+    };
+  }
+  if (queries.long && queries.lat && queries.radius) {
+    const clientPetition = await axios.get(
+      `http://localhost:5000/v1/?lat=${req.query.lat}&long=${req.query.long}&radius=${req.query.radius}`
+    );
+    // make a list with the ids of the clients in order to add them to the filter
+    const clientIds = clientPetition.data.map((client) => client._id);
+
+    filtros = {
+      ...filtros,
+      userID: { $in: clientIds },
     };
   }
   return filtros;
