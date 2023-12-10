@@ -32,4 +32,19 @@ app.get("/:id1/:id2", async (req, res) => {
   }
 });
 
+app.delete("/:id", async (req, res) => {
+  try {
+    const result = await products.deleteOne({
+      _id: new ObjectId(req.params.id),
+    });
+    //delete the photos
+    await axios.delete("http://localhost:5004/v2/folder", {
+      data: { productId: req.params.id },
+    });
+    res.send(result).status(200);
+  } catch (e) {
+    res.send(e).status(500);
+  }
+});
+
 export default app;
