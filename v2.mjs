@@ -7,6 +7,8 @@ import axios from "axios";
 
 const app = express.Router();
 
+const cloudinary = process.env.CLOUDINARY != undefined ? process.env.CLOUDINARY : "localhost";
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -38,7 +40,7 @@ app.delete("/:id", async (req, res) => {
       _id: new ObjectId(req.params.id),
     });
     //delete the photos
-    await axios.delete("http://localhost:5004/v2/folder", {
+    await axios.delete(`http://${cloudinary}:5004/v2/folder`, {
       data: { productId: req.params.id },
     });
     res.send(result).status(200);

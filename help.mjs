@@ -1,5 +1,7 @@
 import axios from "axios";
 
+const clients = process.env.CLIENTS != undefined ? process.env.CLIENTS : "localhost";
+
 export async function getFiltros(req) {
   let filtros = {};
   const queries = req.query;
@@ -25,7 +27,7 @@ export async function getFiltros(req) {
   }
   if (queries.long && queries.lat && queries.radius) {
     const clientPetition = await axios.get(
-      `http://localhost:5000/v1/?lat=${req.query.lat}&long=${req.query.long}&radius=${req.query.radius}`
+      `http://${clients}:5000/v1/?lat=${req.query.lat}&long=${req.query.long}&radius=${req.query.radius}`
     );
     // make a list with the ids of the clients in order to add them to the filter
     const clientIds = clientPetition.data.map((client) => client._id);
