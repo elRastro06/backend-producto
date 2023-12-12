@@ -26,5 +26,5 @@ const verifyToken = async (req, res, next) => {
   }
 }
 
-app.use("/v1", v1);
-app.use("/v2", v2);
+app.use("/v1", verifyToken, v1);
+app.use("/v2", verifyToken, v2);
