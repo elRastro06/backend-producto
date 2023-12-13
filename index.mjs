@@ -30,7 +30,7 @@ const verifyToken = async (req, res, next) => {
             else if (req.params.id1 != undefined && req.params.id2 != undefined) {
                 if (req.params.id1 != user._id && req.params.id2 != user._id) res.status(402).send("Unauthorized action");
             }
-        }
+        } else if (req.method == 'POST' && req.body.userID != user._id) res.status(402).send("Unauthorized action");
 
         next();
     } catch {
