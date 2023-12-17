@@ -2,7 +2,9 @@ import { ObjectId } from "mongodb";
 import products from "./conn.mjs";
 import express from "express";
 import { getFiltros, getSortByDate } from "./help.mjs";
-import { getClientById, getBidsByProductId } from "./api.mjs";
+import { getClientById, getBidsByProductId, getBidWinner } from "./api.mjs";
+import squedule from "node-schedule";
+import axios from "axios";
 
 const app = express.Router();
 
@@ -28,6 +30,47 @@ app.get("/", async (req, res) => {
     res.send(e).status(500);
   }
 });
+
+const email_api = "http://localhost:5005/v1/send-email";
+
+const squeduleJob = async (date, product, token) => {
+  console.log("squedule the job for: ", date);
+  const winner = await getBidWinner(product._id, token);
+  let message = `La subasta del producto ${product.name} ha finalizado`;
+  if (winner) {
+    const winner_user = await getClientById(winner);
+    message += ` y el ganador es el usuario ${winner_user.name}`;
+    const email_winner = await axios.post(email_api, {
+      to: winner_user.email,
+      subject: "Subasta finalizada",
+      text: `Has ganado la subasta para el producto ${product.name}.`,
+    });
+  } else {
+    message += ` y no hubo ganador`;
+    product.date = new Date();
+    product.price = product.price * 0.9;
+    const id = product._id;
+    delete product._id;
+    await updateProduct(id, product, token);
+  }
+  const cliente = await getClientById(product.userID);
+  const email_owner = await axios.post(email_api, {
+    to: cliente.email,
+    subject: "Subasta finalizada",
+    text: message,
+  });
+};
+
+const scheduleEmail = async (product, token) => {
+  console.logs;
+  const date = new Date(product.date);
+  date.setDate(date.getDate() + product.length);
+  // date.setMinutes(date.getMinutes() + 1); for testing
+
+  const job = squedule.scheduleJob(date, () =>
+    squeduleJob(date, product, token)
+  );
+};
 
 app.post("/", async (req, res) => {
   try {
@@ -61,15 +104,29 @@ app.delete("/:id", async (req, res) => {
 
 app.put("/:id", async (req, res) => {
   try {
-    const result = await products.updateOne(
-      { _id: new ObjectId(req.params.id) },
-      { $set: req.body }
+    const result = await updateProduct(
+      req.params.id,
+      req.body,
+      req.headers.authorization
     );
     res.send(result).status(200);
   } catch (e) {
     res.send(e).status(500);
   }
 });
+
+const updateProduct = async (id, product, token) => {
+  const result = await products.updateOne(
+    { _id: new ObjectId(id) },
+    { $set: product }
+  );
+  product._id = id;
+  console.log(product);
+  if (product.date && product.length) {
+    scheduleEmail(product, token);
+  }
+  return result;
+};
 
 app.get("/:id/cliente", async (req, res) => {
   try {
