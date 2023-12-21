@@ -21,16 +21,27 @@ const clients = process.env.CLIENTS != undefined ? process.env.CLIENTS : "localh
 
 const verifyToken = async (req, res, next) => {
     try {
-        const response = await axios.get(`http://${clients}:5000/checkToken/${req.headers.authorization}`);
-        const user = response.data.user;
+        if (req.method != "GET") {
+            const response = await axios.get(`http://${clients}:5000/checkToken/${req.headers.authorization}`);
+            const user = response.data.user;
 
-        if (req.params.id != null) {
-            const product = await products.findOne({ _id: new ObjectId(req.params.id) });
-            if (product.userID != user._id) res.status(402).send("Unauthorized action");
-            else if (req.params.id1 != undefined && req.params.id2 != undefined) {
-                if (req.params.id1 != user._id && req.params.id2 != user._id) res.status(402).send("Unauthorized action");
+            if (req.params.id != null) {
+                const product = await products.findOne({ _id: new ObjectId(req.params.id) });
+                if (product.userID != user._id) {
+                    res.status(402).send("Unauthorized action");
+                    return;
+                }
+                else if (req.params.id1 != undefined && req.params.id2 != undefined) {
+                    if (req.params.id1 != user._id && req.params.id2 != user._id) {
+                        res.status(402).send("Unauthorized action");
+                        return;
+                    }
+                }
+            } else if (req.method == 'POST' && req.body.userID != user._id) {
+                res.status(402).send("Unauthorized action");
+                return;
             }
-        } else if (req.method == 'POST' && req.body.userID != user._id) res.status(402).send("Unauthorized action");
+        }
 
         next();
     } catch {
