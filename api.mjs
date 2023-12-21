@@ -1,6 +1,8 @@
 import axios from "axios";
-const urlCliente = "http://localhost:5000/v1";
-const urlBids = "http://localhost:5002/v1";
+import "dotenv/config";
+
+const urlCliente = process.env.CLIENTS_URL;
+const urlBids = process.env.BIDS_URL;
 
 export const getBidWinner = async (productId, token) => {
   console.log("getBidWinner", productId);

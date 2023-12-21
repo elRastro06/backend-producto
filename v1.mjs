@@ -5,6 +5,7 @@ import { getFiltros, getSortByDate } from "./help.mjs";
 import { getClientById, getBidsByProductId, getBidWinner } from "./api.mjs";
 import squedule from "node-schedule";
 import axios from "axios";
+import "dotenv/config";
 
 const app = express.Router();
 
@@ -31,7 +32,7 @@ app.get("/", async (req, res) => {
   }
 });
 
-const email_api = "http://localhost:5005/v1/send-email";
+const email_api = process.env.EMAILS_URL;
 
 const squeduleJob = async (date, product, token) => {
   console.log("squedule the job for: ", date);
@@ -40,7 +41,7 @@ const squeduleJob = async (date, product, token) => {
   if (winner) {
     const winner_user = await getClientById(winner);
     message += ` y el ganador es el usuario ${winner_user.name}`;
-    const email_winner = await axios.post(email_api, {
+    const email_winner = await axios.post(`${email_api}/send-email`, {
       to: winner_user.email,
       subject: "Subasta finalizada",
       text: `Has ganado la subasta para el producto ${product.name}.`,
@@ -54,7 +55,7 @@ const squeduleJob = async (date, product, token) => {
     await updateProduct(id, product, token);
   }
   const cliente = await getClientById(product.userID);
-  const email_owner = await axios.post(email_api, {
+  const email_owner = await axios.post(`${email_api}/send-email`, {
     to: cliente.email,
     subject: "Subasta finalizada",
     text: message,
