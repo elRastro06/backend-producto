@@ -1,6 +1,7 @@
 import axios from "axios";
+import "dotenv/config";
 
-const clients = process.env.CLIENTS != undefined ? process.env.CLIENTS : "localhost";
+const clients = process.env.CLIENTS_URL;
 
 export async function getFiltros(req) {
   let filtros = {};
@@ -27,7 +28,7 @@ export async function getFiltros(req) {
   }
   if (queries.long && queries.lat && queries.radius) {
     const clientPetition = await axios.get(
-      `http://${clients}:5000/v1/?lat=${req.query.lat}&long=${req.query.long}&radius=${req.query.radius}`, {
+      `${clients}/v1/?lat=${req.query.lat}&long=${req.query.long}&radius=${req.query.radius}`, {
         headers: {
             "Authorization": req.headers.authorization
         }
