@@ -75,7 +75,11 @@ const scheduleEmail = async (product, token) => {
 app.post("/", async (req, res) => {
   try {
     const product = req.body;
-    const result = await products.insertOne({ ...product, date: new Date() });
+    const result = await products.insertOne({
+      ...product,
+      date: new Date(),
+      payed: false,
+    });
     res.send(result).status(200);
   } catch (e) {
     res.send(e).status(500);
@@ -104,14 +108,24 @@ app.delete("/:id", async (req, res) => {
 
 app.put("/:id", async (req, res) => {
   try {
+    const { _id, ...product } = req.body;
+
     const result = await updateProduct(
       req.params.id,
-      req.body,
+      product,
       req.headers.authorization
     );
-    res.send(result).status(200);
+
+    // Check if the product was updated successfully
+    if (result && result.modifiedCount > 0) {
+      const updatedProduct = await getProductById(req.params.id);
+      res.json(updatedProduct).status(200);
+    } else {
+      res.status(404).json({ error: "Product not found" });
+    }
   } catch (e) {
-    res.send(e).status(500);
+    console.error("Error updating product:", e);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
@@ -120,12 +134,15 @@ const updateProduct = async (id, product, token) => {
     { _id: new ObjectId(id) },
     { $set: product }
   );
-  product._id = id;
-  console.log(product);
   if (product.date && product.length) {
     scheduleEmail(product, token);
   }
   return result;
+};
+
+const getProductById = async (id) => {
+  // Add logic to fetch and return the updated product by ID
+  return await products.findOne({ _id: new ObjectId(id) });
 };
 
 app.get("/:id/cliente", async (req, res) => {
