@@ -24,7 +24,7 @@ export const getBidWinner = async (productId, token) => {
 };
 
 export const getClientById = async (id) => {
-  const response = await axios.get(`${urlCliente}/${id}`, {
+  const response = await axios.get(`${urlCliente}/v1/${id}`, {
     headers: {
       Authorization: process.env.GOOGLE_CLIENT_ID,
     },
