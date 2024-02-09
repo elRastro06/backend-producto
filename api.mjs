@@ -33,6 +33,6 @@ export const getClientById = async (id) => {
 };
 
 export const getBidsByProductId = async (id) => {
-  const response = await axios.get(`${urlBids}/?productId=${id}`);
+  const response = await axios.get(`${urlBids}/v1/?productId=${id}`);
   return response.data;
 };
